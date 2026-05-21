@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Quiz Solver</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    width: 340px;
+    background: #0f1117;
+    color: #e2e8f0;
+    font-size: 14px;
+  }
+  .header {
+    background: #1a1d2e;
+    padding: 14px 16px;
+    border-bottom: 1px solid #2d3148;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .header-title { font-weight: 600; font-size: 15px; color: #f1f5f9; }
+  .header-sub { font-size: 11px; color: #64748b; }
+
+  .section { padding: 14px 16px; border-bottom: 1px solid #1e2235; }
+  .section:last-child { border-bottom: none; }
+
+  label { font-size: 12px; color: #94a3b8; margin-bottom: 5px; display: block; }
+
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: #1e2235;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: #6366f1; }
+
+  .btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+  }
+  .btn-secondary {
+    background: #1e2235;
+    color: #94a3b8;
+    border: 1px solid #2d3148;
+    margin-top: 8px;
+  }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .dot-green { background: #22c55e; box-shadow: 0 0 6px #22c55e88; }
+  .dot-gray { background: #475569; }
+  .dot-orange { background: #f59e0b; box-shadow: 0 0 6px #f59e0b88; }
+
+  .status-row {
+    display: flex; align-items: center;
+    font-size: 12px; color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  .mode-toggle {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .mode-btn {
+    flex: 1; padding: 7px; border-radius: 7px;
+    border: 1px solid #2d3148;
+    background: #1e2235;
+    color: #64748b; font-size: 12px; font-weight: 500;
+    cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .mode-btn.active {
+    background: #312e81;
+    border-color: #6366f1;
+    color: #a5b4fc;
+  }
+
+  .result-box {
+    background: #1e2235;
+    border: 1px solid #2d3148;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 10px;
+    display: none;
+  }
+  .result-box.visible { display: block; }
+  .result-answer {
+    font-size: 22px; font-weight: 700;
+    background: linear-gradient(135deg, #6366f1, #22c55e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .result-text { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+  .result-correct { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+
+  .tip {
+    background: #1a2535;
+    border: 1px solid #1e3a5f;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #60a5fa;
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  .tip-title { font-weight: 600; margin-bottom: 3px; }
+
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid #4f46e5;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .api-key-row { display: flex; gap: 6px; }
+  .api-key-row input { flex: 1; }
+  .save-btn {
+    padding: 8px 12px;
+    background: #312e81;
+    border: 1px solid #6366f1;
+    border-radius: 8px;
+    color: #a5b4fc;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .save-btn:hover { background: #3730a3; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🧠</div>
+  <div>
+    <div class="header-title">Quiz Solver</div>
+    <div class="header-sub">Mechatronika & Robotyka</div>
+  </div>
+</div>
+
+<!-- API Key Section -->
+<div class="section">
+  <label>API ключ Anthropic (claude.ai)</label>
+  <div class="api-key-row">
+    <input type="password" id="apiKey" placeholder="AIza..." />
+    <button class="save-btn" id="saveKey">Сохранить</button>
+  </div>
+  <div style="margin-top:6px; font-size:11px; color:#475569;">
+    Получи бесплатно на <a href="https://aistudio.google.com" target="_blank" style="color:#6366f1;">console.anthropic.com</a>
+  </div>
+</div>
+
+<!-- Mode Section -->
+<div class="section">
+  <div class="status-row" id="statusRow">
+    <span class="status-dot dot-gray" id="statusDot"></span>
+    <span id="statusText">Ожидание — открой страницу с тестом</span>
+  </div>
+
+  <label>Режим работы</label>
+  <div class="mode-toggle">
+    <div class="mode-btn active" id="modeShow">👁 Показать ответ</div>
+    <div class="mode-btn" id="modeAuto">⚡ Авто-клик</div>
+  </div>
+
+  <button class="btn btn-primary" id="scanBtn">
+    🔍 Найти вопрос на странице
+  </button>
+  <button class="btn btn-secondary" id="scanScreenBtn">
+    📷 Скриншот + распознать
+  </button>
+</div>
+
+<!-- Result -->
+<div class="section" id="resultSection" style="display:none;">
+  <label>Результат</label>
+  <div class="result-box visible" id="resultBox">
+    <div class="result-answer" id="resultLetter">—</div>
+    <div class="result-correct" id="resultCorrect"></div>
+    <div class="result-text" id="resultExplain"></div>
+  </div>
+</div>
+
+<!-- Tip -->
+<div class="section">
+  <div class="tip">
+    <div class="tip-title">💡 Как использовать</div>
+    1. Сохрани API ключ<br>
+    2. Открой страницу с тестом<br>
+    3. Нажми «Найти вопрос» — расширение само прочитает и ответит<br>
+    4. Режим «Авто-клик» сам кликнет на правильный ответ
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
